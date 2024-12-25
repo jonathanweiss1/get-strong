@@ -30,6 +30,7 @@ class TrainController extends GetxController {
   final weightInputController = TextEditingController();
   final timer = Rx<SetPauseTimer>(SetPauseTimer(focusTime: 60));
   final setPauseTimerRemainingSeconds = 0.obs;
+  final lastFiveWorkouts = Rx<List<Workout> >(<Workout>[]);
 
   @override
   Future<void> onInit() async {
@@ -40,6 +41,7 @@ class TrainController extends GetxController {
       setSet(1);
       setInputController.text = "1";
       timer(SetPauseTimer(focusTime: workoutplan.value!.movements[0].breakTimeSeconds));
+      lastFiveWorkouts(await databaseService.loadLatest5Workouts());
     }
     super.onInit();
   }

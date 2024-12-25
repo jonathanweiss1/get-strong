@@ -1,4 +1,5 @@
 import 'package:get_strong/components/gradientbutton.dart';
+import 'package:get_strong/components/workout_history.dart';
 import 'package:get_strong/config.dart';
 import 'package:get_strong/controller/train.dart';
 import 'package:get_strong/model/workoutstate.dart';
@@ -31,7 +32,8 @@ class TrainView extends GetView<TrainController> {
                         GradientButton(
                             onPressed: () => trainCtrl.startWorkout(),
                             label: "Resume Latest",
-                            colorGradient: GSHighlightGradient)
+                            colorGradient: GSHighlightGradient),
+                        WorkoutHistory(workouts: trainCtrl.lastFiveWorkouts.value)
                       ]))
                 : Padding(
                     padding: const EdgeInsets.all(10),

@@ -3,6 +3,7 @@ import 'package:get_strong/model/user.dart';
 import 'package:get_strong/model/workout.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_strong/services/authentication.dart';
+import 'package:get_strong/services/workoutplan_loader.dart';
 
 /// Handles communication with the remote database
 class DatabaseService {
@@ -57,6 +58,16 @@ class DatabaseService {
       /// Get the current user's id
       final user = authService.getCurrentUser();
       // Map<String, dynamic> workoutMap = await FirebaseFirestore.instance.collection('workouts').where('user', isEqualTo: user!.id).where('workoutFinished', isEqualTo: false).orderBy('date', descending: true).limit(1);
+  }
+
+  Future<List<Workout> > loadLatest5Workouts() async {
+    WorkoutPlanLoaderService workoutPlanLoader = Get.find<WorkoutPlanLoaderService>();
+    final workoutplan = await workoutPlanLoader.load();
+    final workouts = <Workout>[];
+    for (int i = 0; i < 5; i++) {
+      workouts.add(Workout(workoutplan!));
+    }
+    return workouts;
   }
 
 }
