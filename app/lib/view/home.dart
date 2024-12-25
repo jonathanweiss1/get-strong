@@ -1,12 +1,12 @@
-import 'package:app/view/train.dart';
+import 'package:get_strong/controller/home.dart';
+import 'package:get_strong/services/authentication.dart';
+import 'package:get_strong/view/analytics.dart';
+import 'package:get_strong/view/login.dart';
+import 'package:get_strong/view/train.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../controller/home.dart';
-import '../main.dart';
-import '../services/authentication.dart';
-import 'analytics.dart';
-
+/// Home screen of the app. Essentially a TabBar widget.
 class HomeView extends GetView<HomeController> {
   final HomeController homeCtrl = Get.find();
   final AuthService authService = Get.find<AuthService>();

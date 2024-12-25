@@ -1,11 +1,16 @@
-import 'package:app/model/exercise.dart';
-import 'package:app/model/workoutplan.dart';
+import 'package:get_strong/model/exercise.dart';
+import 'package:get_strong/model/workoutplan.dart';
+import 'package:get_strong/utils/dates.dart';
 
 /// A Workout is the instance in which a specific WorkoutPlan is actually carried out.
 /// It contains a list of Exercises which save the achieved reps and weights for each movement in the WorkoutPlan
 class Workout {
   final exercises = <Exercise>[];
   final WorkoutPlan workoutplan;
+  var lastFinishedExercise = 0;
+  final date = currentDate();
+  var workoutFinished = false;
+  String? workoutId = null;  // null means the workout has no equivalent in the database.
 
   /// Initializes the list of exercises with the default values for each movement
   Workout(this.workoutplan) {
@@ -37,5 +42,29 @@ class Workout {
   /// return the number of sets for movement at idx
   int getNumOfSets(int idx) {
     return exercises[idx].getNumOfSets();
+  }
+
+  void finishNextExercise() {
+    lastFinishedExercise++;
+    if (lastFinishedExercise == exercises.length) {
+      workoutFinished = true;
+    }
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'exercises': exercises,
+      'workoutplan': workoutplan.name,
+      'lastFinishedExercise': lastFinishedExercise,
+      'date': date.toIso8601String(),
+      'workoutFinished': workoutFinished
+    };
+  }
+
+  Workout.fromMap(Map<String, dynamic> map, this.workoutplan) {
+    for (var exercise in map['exercises']) {
+      exercises.add(exercise);
+    }
+    
   }
 }

@@ -1,12 +1,13 @@
-import 'package:app/components/gradientbutton.dart';
-import 'package:app/config.dart';
-import 'package:app/controller/train.dart';
-import 'package:app/model/workoutstate.dart';
-import 'package:app/utils/numeric_range_formatter.dart';
+import 'package:get_strong/components/gradientbutton.dart';
+import 'package:get_strong/config.dart';
+import 'package:get_strong/controller/train.dart';
+import 'package:get_strong/model/workoutstate.dart';
+import 'package:get_strong/utils/numeric_range_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+/// Train screen. Guides the user through the different exercises in a workout.
 class TrainView extends GetView<TrainController> {
   final TrainController trainCtrl = Get.find();
 

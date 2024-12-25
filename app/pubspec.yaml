@@ -1,4 +1,4 @@
-name: app
+name: get_strong
 description: A MWP for a workout app.
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

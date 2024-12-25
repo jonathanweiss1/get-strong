@@ -1,11 +1,13 @@
-import 'package:app/config.dart';
+import 'package:get_strong/config.dart';
+import 'package:get_strong/model/user.dart';
+import 'package:get_strong/services/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 
-import '../model/user.dart';
-
+/// Handles everything regarding auth.
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
+  final DatabaseService database = Get.find<DatabaseService>();
 
   /// create user
   Future<GSUser?> signUpUser(
@@ -21,11 +23,13 @@ class AuthService {
       );
       final User? firebaseUser = userCredential.user;
       if (firebaseUser != null) {
-        return GSUser(
+        final user = GSUser(
           id: firebaseUser.uid,
           email: firebaseUser.email ?? '',
-          displayName: firebaseUser.displayName ?? '',
+          displayName: firebaseUser.displayName ?? 'User',
         );
+        final cloudUserCreated = await database.createUser(user);
+        return cloudUserCreated ? user : null;
       }
     } on FirebaseAuthException catch (e) {
       print(e.toString());
@@ -68,6 +72,7 @@ class AuthService {
     return null;
   } 
 
+  /// Returns the currently logged in user
   GSUser? getCurrentUser () {
     if (DEBUG_SKIP_AUTH) return null;
     final User? firebaseUser = FirebaseAuth.instance.currentUser;

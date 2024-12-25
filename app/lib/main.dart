@@ -1,6 +1,6 @@
-import 'package:app/controller/train.dart';
-import 'package:app/model/user.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_strong/controller/train.dart';
+import 'package:get_strong/services/database.dart';
+import 'package:get_strong/view/login.dart';
 
 import 'controller/home.dart';
 import 'services/authentication.dart';
@@ -10,17 +10,21 @@ import 'package:get/get.dart';
 import 'controller/login.dart';
 import 'firebase_options.dart';
 import 'services/workoutplan_loader.dart';
-import 'view/home.dart';
 import 'config.dart';
 
 void main() async {
+
+  // init
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  Get.put(DatabaseService());
   Get.put(AuthService());
   Get.put(WorkoutPlanLoaderService());
   Get.put(LoginController());
   Get.put(HomeController());
   Get.put(TrainController());
+
+  // main frame
   runApp(GetMaterialApp(
     home: LoginView(), 
     theme: ThemeData.light().copyWith(
@@ -43,59 +47,4 @@ void main() async {
     title: 'Get Strong!',
     debugShowCheckedModeBanner: false,
     ));
-}
-
-class LoginView extends GetView<LoginController> {
-  final LoginController loginCtrl = Get.find();
-  final AuthService authService = Get.find<AuthService>();
-
-  LoginView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    if(authService.getCurrentUser() != null || DEBUG_SKIP_AUTH) {
-      Future.microtask(() => Get.off(HomeView()));
-    }
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Get Strong!"),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextField(
-              decoration: const InputDecoration(
-                labelText: "E-mail"
-              ),
-              controller: loginCtrl.emailEditingController
-            ),
-            TextField(decoration: const InputDecoration(
-              labelText: "Password",
-              ),
-              controller: loginCtrl.passwordEditingController,
-              obscureText: true,
-            ),
-            TextButton(
-              child: const Text("Log In"),
-              onPressed: () async {
-                final GSUser? user = await authService.signInUser(loginCtrl.emailEditingController.text, loginCtrl.passwordEditingController.text);
-                if (user != null) {
-                  Get.off(() => HomeView());
-                }
-              }
-            ),
-            TextButton(child: const Text("Sign Up"),
-            onPressed: () async {
-                final GSUser? user = await authService.signUpUser(loginCtrl.emailEditingController.text, loginCtrl.passwordEditingController.text);
-                if (user != null) {
-                  Get.off(() => HomeView());
-                }
-              }
-            )
-          ],
-        ),
-      ),
-    );
-  }
 }

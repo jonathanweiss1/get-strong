@@ -1,9 +1,10 @@
 import 'dart:convert';
 
-import 'package:app/model/movement.dart';
-import 'package:app/model/workoutplan.dart';
+import 'package:get_strong/model/movement.dart';
+import 'package:get_strong/model/workoutplan.dart';
 import 'package:flutter/services.dart';
 
+/// Provides methods for loading workout plans from json assets.
 class WorkoutPlanLoaderService {
   final String pathToPlan = 'assets/trainingsplan.json';
     

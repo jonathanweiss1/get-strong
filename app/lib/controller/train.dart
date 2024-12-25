@@ -1,12 +1,14 @@
-import 'package:app/controller/timer.dart';
-import 'package:app/model/movement.dart';
-import 'package:app/model/workout.dart';
-import 'package:app/model/workoutplan.dart';
-import 'package:app/model/workoutstate.dart';
-import 'package:app/services/workoutplan_loader.dart';
+import 'package:get_strong/controller/timer.dart';
+import 'package:get_strong/model/movement.dart';
+import 'package:get_strong/model/workout.dart';
+import 'package:get_strong/model/workoutplan.dart';
+import 'package:get_strong/model/workoutstate.dart';
+import 'package:get_strong/services/database.dart';
+import 'package:get_strong/services/workoutplan_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+/// Controller for train view
 /// The train controller handles how a workout is performed. It performs the following steps:
 /// 1. Load workoutplan from disk
 /// 2. Wait for user to start the workout
@@ -16,6 +18,7 @@ import 'package:get/get.dart';
 /// 6. Complete workout
 class TrainController extends GetxController {
   WorkoutPlanLoaderService workoutPlanLoader = Get.find<WorkoutPlanLoaderService>();
+  DatabaseService databaseService = Get.find<DatabaseService>();
   final workoutplan = Rx<WorkoutPlan?>(null);
   final currentMovement = Rx<Movement?>(null);
   final workoutState = Rx<WorkoutState>(WorkoutState.idle);
@@ -91,12 +94,19 @@ class TrainController extends GetxController {
 
   void setSet(int set) {
     currentSet(set);
+    setInputController.text = "$set";
     repInputController.text = "${workout.value?.getReps(currentMovementIdx, set)}";
     weightInputController.text = "${workout.value?.getWeight(currentMovementIdx, set)}";
   }
 
   /// Handles all steps that need to be performed when a workout is finished
-  void finishWorkout() {
+  void finishWorkout() async {
+    if (workout.value!.workoutId == null) {
+      await databaseService.createWorkout(workout.value);
+    }
+    else {
+      await databaseService.updateWorkout(workout.value);
+    }
     workoutState(WorkoutState.idle);  // In the future this could be WorkoutState.finished instead to show a summary
     reset();
   }
@@ -117,12 +127,22 @@ class TrainController extends GetxController {
   /// and the next exercise is selected.
   void startSetPause() {
     workoutState(WorkoutState.paused);
-    // callback:
-    // nextMovement()
+    setPauseTimerRemainingSeconds(currentMovement.value!.breakTimeSeconds);
+    timer(SetPauseTimer(focusTime: currentMovement.value!.breakTimeSeconds));
+    timer.value.start(callback: (bool timeNotUp) {
+      if (timeNotUp) {
+        setPauseTimerRemainingSeconds(setPauseTimerRemainingSeconds.value - 1);
+      }
+      else {
+        workoutState(WorkoutState.started);
+        nextMovement();
+      }
+    });
   }
 
   /// Skips the running set pause and switches directly back to started or lastMovement and selects the next exercise
   void skipSetPause() {
+    timer.value.pause();
     workoutState(WorkoutState.started);
     nextMovement();
   }

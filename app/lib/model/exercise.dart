@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:app/model/movement.dart';
+import 'package:get_strong/model/movement.dart';
 
 /// Exercise is the actual instance in which a specific movement is performed multiple times.
 class Exercise {

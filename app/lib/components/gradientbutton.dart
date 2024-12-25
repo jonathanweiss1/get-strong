@@ -1,6 +1,6 @@
-import 'package:app/config.dart';
 import 'package:flutter/material.dart';
 
+/// A type of button with a gradient as background. Requires a Gradient in addition to the standard button parameters
 class GradientButton extends StatelessWidget {
   final Function? onPressed;
   final String label;
