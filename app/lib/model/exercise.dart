@@ -49,4 +49,18 @@ class Exercise {
   num calculate1RM(num weight, int reps) {
     return weight * pow((0.522 + 0.419 * pow(e, -0.055 * reps)), -1);
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'movement': movement.toMap(),
+      'reps': reps,
+      'weights': weights
+    };
+  }
+
+  Exercise.fromMap(Map<String, dynamic> map) : movement = Movement.fromMap(map['movement']) {
+    map['reps'].forEach((element) => reps.add(element));
+    map['weights'].forEach((element) => weights.add(element));
+  }
+
 }

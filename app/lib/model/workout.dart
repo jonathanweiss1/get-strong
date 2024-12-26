@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_strong/model/exercise.dart';
 import 'package:get_strong/model/workoutplan.dart';
 import 'package:get_strong/utils/dates.dart';
@@ -7,10 +8,10 @@ import 'package:get_strong/utils/dates.dart';
 class Workout {
   final exercises = <Exercise>[];
   final WorkoutPlan workoutplan;
-  var lastFinishedExercise = 0;
-  final date = currentDate();
+  var lastFinishedExercise = -1;
+  var date = currentDate();
   var workoutFinished = false;
-  String? workoutId = null;  // null means the workout has no equivalent in the database.
+  String? workoutId;  // null means the workout has no equivalent in the database.
 
   /// Initializes the list of exercises with the default values for each movement
   Workout(this.workoutplan) {
@@ -53,18 +54,21 @@ class Workout {
 
   Map<String, dynamic> toMap() {
     return {
-      'exercises': exercises,
-      'workoutplan': workoutplan.name,
+      'exercises': exercises.map((exercise) => exercise.toMap()).toList(),
       'lastFinishedExercise': lastFinishedExercise,
-      'date': date.toIso8601String(),
-      'workoutFinished': workoutFinished
+      'date': date,
+      'workoutFinished': workoutFinished,
+      'workoutId': workoutId
     };
   }
 
   Workout.fromMap(Map<String, dynamic> map, this.workoutplan) {
     for (var exercise in map['exercises']) {
-      exercises.add(exercise);
+      exercises.add(Exercise.fromMap(exercise));
     }
-    
+    lastFinishedExercise = map['lastFinishedExercise'];
+    date = (map['date'] as Timestamp).toDate();
+    workoutFinished = map['workoutFinished'];
+    workoutId = map['workoutId'];
   }
 }

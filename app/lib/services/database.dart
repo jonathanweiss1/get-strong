@@ -2,12 +2,11 @@ import 'package:get/get.dart';
 import 'package:get_strong/model/user.dart';
 import 'package:get_strong/model/workout.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get_strong/services/authentication.dart';
+import 'package:get_strong/model/workoutplan.dart';
 import 'package:get_strong/services/workoutplan_loader.dart';
 
 /// Handles communication with the remote database
 class DatabaseService {
-  AuthService authService = Get.find<AuthService>();
 
   Future<bool> createUser(GSUser user) async {
     try {
@@ -20,13 +19,12 @@ class DatabaseService {
 
   /// Store the workout in the database. This works for both finished and unfinished workouts.
   /// The current user's id is added before uploading.
-  Future<Workout?> createWorkout(Workout? workout) async {
+  Future<Workout?> createWorkout(Workout? workout, GSUser? user) async {
     if (workout == null) {
       return null;
     }
     try {
       Map<String, dynamic> workoutMap = workout.toMap();
-      final user = authService.getCurrentUser();
       if (user != null) {
         workoutMap['user'] = user.id;
         await FirebaseFirestore.instance.collection('workouts').add(workoutMap);
@@ -35,6 +33,7 @@ class DatabaseService {
     } catch(e) {
       return null;
     }
+    return null;
   }
 
   /// Update the entry of the current workout in the database. 
@@ -54,20 +53,37 @@ class DatabaseService {
   }
 
   /// Get the user's last unfinished workout from the database. Will return null if there is none.
-  Future<Workout?> loadLastUnfinishedWorkout() async {
-      /// Get the current user's id
-      final user = authService.getCurrentUser();
-      // Map<String, dynamic> workoutMap = await FirebaseFirestore.instance.collection('workouts').where('user', isEqualTo: user!.id).where('workoutFinished', isEqualTo: false).orderBy('date', descending: true).limit(1);
+  Future<Workout?> loadLastUnfinishedWorkout(GSUser? currentUser, WorkoutPlan? workoutplan) async {
+    if (currentUser == null || workoutplan == null) {
+      return null;
+    }
+      try {
+        final workoutDb = await FirebaseFirestore.instance.collection('workouts').where("user", isEqualTo: currentUser.id).where("workoutFinished", isEqualTo: false).orderBy('date', descending: true).limit(1).get();
+        final workout = workoutDb.docs.first.data();
+        workout['workoutId'] = workoutDb.docs.first.id;
+        return Workout.fromMap(workoutDb.docs.first.data(), workoutplan);
+      } catch (e) {
+        print(e);
+      }
+      return null;
   }
 
-  Future<List<Workout> > loadLatest5Workouts() async {
-    WorkoutPlanLoaderService workoutPlanLoader = Get.find<WorkoutPlanLoaderService>();
-    final workoutplan = await workoutPlanLoader.load();
-    final workouts = <Workout>[];
-    for (int i = 0; i < 5; i++) {
-      workouts.add(Workout(workoutplan!));
+  Future<List<Workout>? > loadLatest5Workouts(GSUser? currentUser, WorkoutPlan? workoutplan) async {
+    if (currentUser == null || workoutplan == null) {
+      return null;
     }
-    return workouts;
+      try {
+        final workoutDb = await FirebaseFirestore.instance.collection('workouts').where("user", isEqualTo: currentUser.id).orderBy('date', descending: true).limit(5).get();
+        final workouts = <Workout>[];
+        for (var element in workoutDb.docs) {
+          workouts.add(Workout.fromMap(element.data(), workoutplan));
+        }
+        return workouts;
+      } catch (e) {
+        print(e);
+      }
+      return null;
+    return null;
   }
 
 }

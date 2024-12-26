@@ -23,4 +23,29 @@ class Movement {
       required this.breakTimeSeconds,
       required this.muscleGroup,
       required this.equipment});
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'sets': sets,
+      'reps': reps,
+      'repUnit': repUnit,
+      'weight': weight,
+      'weightUnit': weightUnit,
+      'breakTimeSeconds': breakTimeSeconds,
+      'muscleGroup': muscleGroup,
+      'equipment': equipment
+    };
+  }
+
+  Movement.fromMap(Map<String, dynamic> map) 
+    : name = map['name'], 
+      sets = map['sets'],
+      reps = map['reps'],
+      repUnit = map['repUnit'],
+      weight = map['weight'],
+      weightUnit = map['weightUnit'],
+      breakTimeSeconds = map['breakTimeSeconds'],
+      muscleGroup = map['muscleGroup'],
+      equipment = List<String>.from(map['equipment'] as List);
 }

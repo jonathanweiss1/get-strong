@@ -1,3 +1,4 @@
+import 'package:get_strong/controller/analytics.dart';
 import 'package:get_strong/controller/train.dart';
 import 'package:get_strong/services/database.dart';
 import 'package:get_strong/view/login.dart';
@@ -23,6 +24,7 @@ void main() async {
   Get.put(LoginController());
   Get.put(HomeController());
   Get.put(TrainController());
+  Get.put(AnalyticsController());
 
   // main frame
   runApp(GetMaterialApp(

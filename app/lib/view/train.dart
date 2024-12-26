@@ -1,7 +1,9 @@
+import 'package:get_strong/components/exercise_history.dart';
 import 'package:get_strong/components/gradientbutton.dart';
 import 'package:get_strong/components/workout_history.dart';
 import 'package:get_strong/config.dart';
 import 'package:get_strong/controller/train.dart';
+import 'package:get_strong/model/exercise.dart';
 import 'package:get_strong/model/workoutstate.dart';
 import 'package:get_strong/utils/numeric_range_formatter.dart';
 import 'package:flutter/material.dart';
@@ -29,11 +31,14 @@ class TrainView extends GetView<TrainController> {
                                 onPressed: () => trainCtrl.startWorkout(),
                                 label: "Start New Workout",
                                 colorGradient: GSPrimaryGradient)),
-                        GradientButton(
-                            onPressed: () => trainCtrl.startWorkout(),
+                        trainCtrl.unfinishedWorkout.value != null ? GradientButton( // resume unfinished button only visible if there is an unfinished workout
+                            onPressed: () => trainCtrl.startWorkout(unfinished: true),
                             label: "Resume Latest",
-                            colorGradient: GSHighlightGradient),
-                        WorkoutHistory(workouts: trainCtrl.lastFiveWorkouts.value)
+                            colorGradient: GSHighlightGradient) : Container(),
+                        Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                            child: WorkoutHistory(
+                                workouts: trainCtrl.lastFiveWorkouts.value))
                       ]))
                 : Padding(
                     padding: const EdgeInsets.all(10),
@@ -124,9 +129,17 @@ class TrainView extends GetView<TrainController> {
                                         text:
                                             newValue.text.replaceAll('.', ','),
                                       ),
-                                    )
+                                    ),
                                   ],
                                 ),
+                                ExerciseHistory(
+                                    exercises: trainCtrl.lastFiveWorkouts.value
+                                        .map((workout) => workout.exercises[
+                                            trainCtrl.currentMovementIdx])
+                                        .toList(),
+                                    dates: trainCtrl.lastFiveWorkouts.value
+                                        .map((workout) => workout.date)
+                                        .toList()),
                                 (trainCtrl.workoutState.value ==
                                             WorkoutState.lastMovement &&
                                         trainCtrl.currentSet.value ==

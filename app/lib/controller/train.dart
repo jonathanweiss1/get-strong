@@ -3,6 +3,7 @@ import 'package:get_strong/model/movement.dart';
 import 'package:get_strong/model/workout.dart';
 import 'package:get_strong/model/workoutplan.dart';
 import 'package:get_strong/model/workoutstate.dart';
+import 'package:get_strong/services/authentication.dart';
 import 'package:get_strong/services/database.dart';
 import 'package:get_strong/services/workoutplan_loader.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import 'package:get/get.dart';
 class TrainController extends GetxController {
   WorkoutPlanLoaderService workoutPlanLoader = Get.find<WorkoutPlanLoaderService>();
   DatabaseService databaseService = Get.find<DatabaseService>();
+  AuthService authService = Get.find<AuthService>();
   final workoutplan = Rx<WorkoutPlan?>(null);
   final currentMovement = Rx<Movement?>(null);
   final workoutState = Rx<WorkoutState>(WorkoutState.idle);
@@ -31,6 +33,7 @@ class TrainController extends GetxController {
   final timer = Rx<SetPauseTimer>(SetPauseTimer(focusTime: 60));
   final setPauseTimerRemainingSeconds = 0.obs;
   final lastFiveWorkouts = Rx<List<Workout> >(<Workout>[]);
+  final unfinishedWorkout = Rx<Workout?>(null);
 
   @override
   Future<void> onInit() async {
@@ -41,7 +44,8 @@ class TrainController extends GetxController {
       setSet(1);
       setInputController.text = "1";
       timer(SetPauseTimer(focusTime: workoutplan.value!.movements[0].breakTimeSeconds));
-      lastFiveWorkouts(await databaseService.loadLatest5Workouts());
+      lastFiveWorkouts(await databaseService.loadLatest5Workouts(authService.getCurrentUser(), workoutplan.value));
+      if (workoutplan.value != null) unfinishedWorkout(await databaseService.loadLastUnfinishedWorkout(authService.getCurrentUser(), workoutplan.value));
     }
     super.onInit();
   }
@@ -52,6 +56,7 @@ class TrainController extends GetxController {
     if (workoutplanNotEmpty() && currentMovement.value != null) {
       if (workoutplan.value!.movements.length > currentMovementIdx + 1) {
         currentMovementIdx += 1;
+        workout.value?.lastFinishedExercise++;
         currentMovement(workoutplan.value!.movements[currentMovementIdx]);
         setSet(1);
       }
@@ -70,7 +75,12 @@ class TrainController extends GetxController {
   }
 
   /// Switches from idle state to started state
-  void startWorkout() {
+  void startWorkout({bool unfinished = false}) {
+    if (unfinished) {
+      workout(unfinishedWorkout.value);
+      currentMovementIdx = workout.value!.lastFinishedExercise + 1;
+      currentMovement(workoutplan.value!.movements[currentMovementIdx]);
+    }
     workoutState(WorkoutState.started);
   }
 
@@ -103,8 +113,12 @@ class TrainController extends GetxController {
 
   /// Handles all steps that need to be performed when a workout is finished
   void finishWorkout() async {
+    if (workoutState.value == WorkoutState.lastMovement) {
+      workout.value?.workoutFinished = true;
+      workout.value?.lastFinishedExercise = currentMovementIdx;
+    }
     if (workout.value!.workoutId == null) {
-      await databaseService.createWorkout(workout.value);
+      await databaseService.createWorkout(workout.value, authService.getCurrentUser());
     }
     else {
       await databaseService.updateWorkout(workout.value);
