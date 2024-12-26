@@ -1,19 +1,19 @@
 # Get Strong! Flutter App
 
 ## Login Screen
-![image](../docs/assets/login.png)
+![image](https://github.com/jonathanweiss1/get-strong/blob/main/docs/assets/login.png)
 
 ## Dashboard
-![image](../docs/assets/main_page.png)
+![image](https://github.com/jonathanweiss1/get-strong/blob/main/docs/assets/analytics.png/main_page.png)
 
 ## Workout Screen
-![image](../docs/assets/current_workout.png)
+![image](https://github.com/jonathanweiss1/get-strong/blob/main/docs/assets/analytics.png/current_workout.png)
 
 ## Set Pause Timer
-![image](../docs/assets/pause_timer.png)
+![image](https://github.com/jonathanweiss1/get-strong/blob/main/docs/assets/analytics.png/pause_timer.png)
 
 ## Last Exercise In Workout
-![image](../docs/assets/last_exercise.png)
+![image](https://github.com/jonathanweiss1/get-strong/blob/main/docs/assets/analytics.png/last_exercise.png)
 
 ## Analytics
-![image](../docs/assets/analytics.png)
+![image](https://github.com/jonathanweiss1/get-strong/blob/main/docs/assets/analytics.png/analytics.png)
