@@ -50,6 +50,16 @@ class TrainController extends GetxController {
     super.onInit();
   }
 
+  /// retrieves newest data from firebase. If we wanted to save on database calls, we could also update the fields manually when saving a workout
+  Future<void> renewData() async {
+    if (workoutplanNotEmpty()) {
+      lastFiveWorkouts(await databaseService.loadLatest5Workouts(authService.getCurrentUser(), workoutplan.value));
+      if (workoutplan.value != null) {
+        final last = await databaseService.loadLastUnfinishedWorkout(authService.getCurrentUser(), workoutplan.value);
+        unfinishedWorkout(last);
+      }
+    }
+  }
 
   /// Switches to the next movement in the plan.
   void nextMovement() {
@@ -125,6 +135,7 @@ class TrainController extends GetxController {
     }
     workoutState(WorkoutState.idle);  // In the future this could be WorkoutState.finished instead to show a summary
     reset();
+    renewData();
   }
 
   /// Reset the controller to its initial state

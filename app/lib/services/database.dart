@@ -61,13 +61,14 @@ class DatabaseService {
         final workoutDb = await FirebaseFirestore.instance.collection('workouts').where("user", isEqualTo: currentUser.id).where("workoutFinished", isEqualTo: false).orderBy('date', descending: true).limit(1).get();
         final workout = workoutDb.docs.first.data();
         workout['workoutId'] = workoutDb.docs.first.id;
-        return Workout.fromMap(workoutDb.docs.first.data(), workoutplan);
+        return Workout.fromMap(workout, workoutplan);
       } catch (e) {
         print(e);
       }
       return null;
   }
 
+  /// Load the latest 5 workouts for the current user
   Future<List<Workout>? > loadLatest5Workouts(GSUser? currentUser, WorkoutPlan? workoutplan) async {
     if (currentUser == null || workoutplan == null) {
       return null;
